@@ -25,31 +25,34 @@ namespace Application.Modules.ContactManagement.Services
             try
             {
                 _logger.LogInformation("{@LogSession}{@Message}{@FilePath}", logSession, "Received a person import from excel task", filePath);
-                var workBook = new XLWorkbook(filePath);
-                var workSheet = workBook.Worksheets.First();
-                var range = workSheet.RangeUsed();
-                var rowCount = range.RowCount();
-
-                var peopleToAdd = new ConcurrentBag<Person>();
-                Parallel.ForEach(Enumerable.Range(2, rowCount - 1), i =>
+                using (var stream = File.OpenRead(filePath))
                 {
-                    // NOTE : For possible exceptions that may occure for each row I we can have different policies such as skipping, saving somewhere, log it, etc
-                    // but here for sake of simplicity I have not handled them
-                    var row = workSheet.Row(i);
-                    var cells = row.Cells();
-                    var rowCells = cells.ToList();
+                    var workBook = new XLWorkbook(stream);
+                    var workSheet = workBook.Worksheets.First();
+                    var range = workSheet.RangeUsed();
+                    var rowCount = range.RowCount();
 
-                    var name = rowCells[0].Value.ToString().Trim();
-                    var lastName = rowCells[1].Value.ToString().Trim();
+                    var peopleToAdd = new ConcurrentBag<Person>();
+                    Parallel.ForEach(Enumerable.Range(2, rowCount - 1), i =>
+                    {
+                        // NOTE : For possible exceptions that may occure for each row I we can have different policies such as skipping, saving somewhere, log it, etc
+                        // but here for sake of simplicity I have not handled them
+                        var row = workSheet.Row(i);
+                        var cells = row.Cells();
+                        var rowCells = cells.ToList();
 
-                    var person = Person.Create(name, lastName);
-                    peopleToAdd.Add(person);
-                });
+                        var name = rowCells[0].Value.ToString().Trim();
+                        var lastName = rowCells[1].Value.ToString().Trim();
 
-                await _dbContext.People.AddRangeAsync(peopleToAdd);
-                _logger.LogInformation("{@LogSession}{@Message}", logSession, "Added people to dbContext");
-                await _dbContext.SaveChangesAsync();
-                _logger.LogInformation("{@LogSession}{@Message}", logSession, "Saved people");
+                        var person = Person.Create(name, lastName);
+                        peopleToAdd.Add(person);
+                    });
+
+                    await _dbContext.People.AddRangeAsync(peopleToAdd);
+                    _logger.LogInformation("{@LogSession}{@Message}", logSession, "Added people to dbContext");
+                    await _dbContext.SaveChangesAsync();
+                    _logger.LogInformation("{@LogSession}{@Message}", logSession, "Saved people");
+                }
             }
             catch (Exception ex)
             {
