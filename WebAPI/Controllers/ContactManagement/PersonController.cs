@@ -10,6 +10,8 @@ namespace WebAPI.Controllers.ContactManagement
         {
             var createdJobID = await Mediator.Send(usecase);
             return Accepted(new { ImportProcessID = createdJobID });
+            // NOTE : then depending on the requirements,
+            // we can have SignalR or another Get endpoint to check the status of this backgroung job
         }
     }
 }

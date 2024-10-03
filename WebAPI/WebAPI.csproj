@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <Folder Include="Base\Heleprs\" />
+    <Folder Include="uploads\people\excelimports\" />
   </ItemGroup>
 
 </Project>

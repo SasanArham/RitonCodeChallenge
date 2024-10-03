@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using Domain.Modules.ContactManagement.People;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Application.Modules.ContactManagement.Services
 {
@@ -28,23 +29,24 @@ namespace Application.Modules.ContactManagement.Services
                 var workSheet = workBook.Worksheets.First();
                 var range = workSheet.RangeUsed();
                 var rowCount = range.RowCount();
-                _logger.LogInformation("{@LogSession}{@RowCount}", logSession, rowCount);
 
-                for (int i = 2; i < rowCount + 1; i++)
+                var peopleToAdd = new ConcurrentBag<Person>();
+                Parallel.ForEach(Enumerable.Range(2, rowCount - 1), i =>
                 {
-                    var row = workSheet.Rows(i.ToString());
+                    // NOTE : For possible exceptions that may occure for each row I we can have different policies such as skipping, saving somewhere, log it, etc
+                    // but here for sake of simplicity I have not handled them
+                    var row = workSheet.Row(i);
                     var cells = row.Cells();
                     var rowCells = cells.ToList();
 
                     var name = rowCells[0].Value.ToString().Trim();
                     var lastName = rowCells[1].Value.ToString().Trim();
 
-                    // NOTE : For possible exceptions that may occure for each row I we can have different policies such as skipping, saving somewhere, log it, etc
-                    // but here for sake of simplicity I have not handled them
                     var person = Person.Create(name, lastName);
-                    _dbContext.People.Add(person);
-                }
+                    peopleToAdd.Add(person);
+                });
 
+                await _dbContext.People.AddRangeAsync(peopleToAdd);
                 _logger.LogInformation("{@LogSession}{@Message}", logSession, "Added people to dbContext");
                 await _dbContext.SaveChangesAsync();
                 _logger.LogInformation("{@LogSession}{@Message}", logSession, "Saved people");
