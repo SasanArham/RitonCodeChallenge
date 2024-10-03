@@ -6,6 +6,8 @@ using MassTransit;
 using System.Reflection;
 using Application.Base.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using Application.Common;
+using Infrastructure.Common;
 
 namespace Infrastructure.Base
 {
@@ -17,6 +19,7 @@ namespace Infrastructure.Base
             services.AddMassTransit(configuration);
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IFileUploader, FileUploader>();
 
             return services;
         }
