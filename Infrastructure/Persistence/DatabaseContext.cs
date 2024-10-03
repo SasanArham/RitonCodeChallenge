@@ -1,5 +1,6 @@
 ﻿using Application.Base;
 using Domain.Base;
+using Domain.Modules.ContactManagement.People;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,8 @@ namespace Infrastructure.Persistence
             _mediator = mediator;
         }
 
+
+        public DbSet<Person> People => Set<Person>();
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
