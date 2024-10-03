@@ -38,13 +38,7 @@ namespace Application.Modules.ContactManagement.Services
                         // NOTE : For possible exceptions that may occure for each row I we can have different policies such as skipping, saving somewhere, log it, etc
                         // but here for sake of simplicity I have not handled them
                         var row = workSheet.Row(i);
-                        var cells = row.Cells();
-                        var rowCells = cells.ToList();
-
-                        var name = rowCells[0].Value.ToString().Trim();
-                        var lastName = rowCells[1].Value.ToString().Trim();
-
-                        var person = Person.Create(name, lastName);
+                        var person = CreatePerson(row);
                         peopleToAdd.Add(person);
                     });
 
@@ -59,6 +53,20 @@ namespace Application.Modules.ContactManagement.Services
                 _logger.LogError("{@LogSession}{@Exception}", logSession, ex);
                 throw;
             }
+        }
+
+
+        private static Person CreatePerson(IXLRow row)
+        {
+            // NOTE : could have been an extension method or an static factory 
+            var cells = row.Cells();
+            var rowCells = cells.ToList();
+
+            var name = rowCells[0].Value.ToString().Trim();
+            var lastName = rowCells[1].Value.ToString().Trim();
+
+            var person = Person.Create(name, lastName);
+            return person;
         }
     }
 }
