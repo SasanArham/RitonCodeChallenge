@@ -8,6 +8,7 @@ using Application.Base.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 using Application.Common;
 using Infrastructure.Common;
+using Hangfire;
 
 namespace Infrastructure.Base
 {
@@ -20,6 +21,7 @@ namespace Infrastructure.Base
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IFileUploader, FileUploader>();
+            services.ConfigHangfire(configuration);
 
             return services;
         }
@@ -60,6 +62,14 @@ namespace Infrastructure.Base
                 });
             });
 
+            return services;
+        }
+
+        private static IServiceCollection ConfigHangfire(this IServiceCollection services, IConfiguration configuration)
+        {
+            string connectionString = SQlDbConnectionStringHelper.GetConnectionString(configuration);
+            services.AddHangfire(config => config.UseSqlServerStorage(connectionString));
+            services.AddHangfireServer(options => options.SchedulePollingInterval = TimeSpan.FromSeconds(3));
             return services;
         }
     }
