@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Application.Modules.ContactManagement.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace Application.Base
@@ -12,6 +13,8 @@ namespace Application.Base
             {
                 cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
             });
+
+            services.AddScoped<IPersonImporter, PersonImporter>();
 
             return services;
         }
