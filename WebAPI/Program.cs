@@ -1,5 +1,4 @@
 using Infrastructure.Base;
-using Repository.Base;
 using Application.Base;
 using WebAPI.Base;
 using WebAPI.Base.Middlewares;
@@ -19,7 +18,6 @@ namespace WebApplication1
             builder.Services.ConfigSwagger();
 
             builder.Services.AddInfrastructureServices(builder.Configuration);
-            builder.Services.AddRepositories(builder.Configuration);
             builder.Services.AddApplicationServices();
 
             builder.Services.ConfigCors();
