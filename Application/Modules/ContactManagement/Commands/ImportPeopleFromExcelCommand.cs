@@ -30,6 +30,9 @@ namespace Application.Modules.ContactManagement.Commands
         public async Task<string> Handle(ImportPeopleFromExcelCommand command, CancellationToken cancellationToken)
         {
             var uploadedFileName = await _fileUploader.UploadAsync(command.File, PeopleDirectoyHelper.ExcelImports());
+
+            // NOTE : Event for more inhanced performance we can first have a job which puts content of the large file
+            // in smaller chunks and have background job per each 
             var jobID = _backgroundJobClient.Enqueue(() => _personImporter.ImportFromExcelAsync($"{PeopleDirectoyHelper.ExcelImports()}{uploadedFileName}"));
             return jobID;
         }
