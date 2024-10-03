@@ -8,8 +8,8 @@ namespace WebAPI.Controllers.ContactManagement
         [HttpPost]
         public async Task<IActionResult> PostAsync(ImportPeopleFromExcelCommand usecase)
         {
-            await Mediator.Send(usecase);
-            return Ok();
+            var createdJobID = await Mediator.Send(usecase);
+            return Accepted(new { ImportProcessID = createdJobID });
         }
     }
 }
